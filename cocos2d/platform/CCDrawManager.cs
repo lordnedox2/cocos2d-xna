@@ -291,6 +291,12 @@ namespace Cocos2D
         {
             get { return m_fScaleY; }
         }
+		
+		//MARCO Added property
+        public static GraphicsDeviceManager GraphicsDeviceMgr
+        {
+            get { return m_GraphicsDeviceMgr; }
+        }
 
         private static IGraphicsDeviceService m_graphicsService;
         private static PresentationParameters m_presentationParameters = new PresentationParameters();

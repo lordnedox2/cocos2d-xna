@@ -24,7 +24,8 @@ namespace Cocos2D
 
     public class CCScrollView : CCLayer
     {
-        private const float SCROLL_DEACCEL_RATE = 0.95f;
+        //private const float SCROLL_DEACCEL_RATE = 0.95f;
+        private const float SCROLL_DEACCEL_RATE = 0.90f; //MARCO Increased deacceleartion
         private const float SCROLL_DEACCEL_DIST = 1.0f;
         private const float BOUNCE_DURATION = 0.15f;
         private const float INSET_RATIO = 0.2f;
@@ -576,7 +577,12 @@ namespace Cocos2D
                         newX = _container.Position.X + moveDistance.X;
                         newY = _container.Position.Y + moveDistance.Y;
 
-                        _scrollDistance = moveDistance;
+                        //MARCO: Fix for scrollview not deaccelerating, don't know why.
+                        if (moveDistance != CCPoint.Zero)
+                        {
+                            _scrollDistance = moveDistance;
+                        }
+						
                         SetContentOffset(new CCPoint(newX, newY));
                     }
                 }

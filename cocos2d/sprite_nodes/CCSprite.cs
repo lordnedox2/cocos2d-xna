@@ -27,6 +27,15 @@ namespace Cocos2D
 
         private string m_TextureFile;
 
+		//MARCO Added
+        public string TextureFile
+        {
+            get
+            {
+                return m_TextureFile;
+            }
+        }
+		
         internal CCV3F_C4B_T2F_Quad m_sQuad;
         protected CCAffineTransform m_transformToBatch; //
         protected int m_uAtlasIndex; // Absolute (real) Index on the SpriteSheet

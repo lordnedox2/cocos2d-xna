@@ -322,7 +322,8 @@ namespace Cocos2D
             }
             else
             {
-                CCLog.Log("cocos2d : getActionByTag: Target not found");
+				//MARCO Removed, it logs too much
+                //CCLog.Log("cocos2d : getActionByTag: Target not found");
             }
             return null;
         }

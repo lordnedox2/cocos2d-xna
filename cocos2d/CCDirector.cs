@@ -1001,7 +1001,8 @@ namespace Cocos2D
                 {
                     m_pNextScene.Visible = true;
                     s.Reset(t, m_pNextScene);
-                    m_pobScenesStack.Add(s);
+                    //MARCO REMOVED - If I pop a scene, why add it again? This way I get 2 times the same scene on the stack! 
+                    //m_pobScenesStack.Add(s);
                     m_pNextScene = s;
                 }
             }
@@ -1021,6 +1022,98 @@ namespace Cocos2D
             PopToSceneStackLevel(1);
         }
 
+		//MARCO ADDED THIS METHOD
+        public void PopToSceneStackLevel(int level)
+        {
+            PopToSceneStackLevel(level, 0, null);
+        }
+
+		/** Pops out all scenes from the queue until it reaches `level`.
+         *   If level is 0, it will end the director.
+         *   If level is 1, it will pop all scenes until it reaches to root scene.
+         *   If level is <= than the current stack level, it won't do anything.
+         */
+        //MARCO ADDED THIS METHOD
+        public void PopToSceneStackLevel(int level, float t, CCTransitionScene s)
+        {
+            Debug.Assert(m_pRunningScene != null, "A running Scene is needed");
+            int c = m_pobScenesStack.Count;
+
+            // level 0? -> end
+            if (level == 0)
+            {
+                End();
+                return;
+            }
+
+            // current level or lower -> nothing
+            if (level >= c)
+                return;
+
+            // pop stack until reaching desired level
+            while (c > level)
+            {
+                var current = m_pobScenesStack[m_pobScenesStack.Count - 1];
+
+                if (current.IsRunning)
+                {
+                    current.OnExitTransitionDidStart();
+                    current.OnExit();
+                }
+
+                current.Cleanup();
+                m_pobScenesStack.RemoveAt(m_pobScenesStack.Count - 1);
+                c--;
+            }
+
+            if (s != null)
+            {
+                m_bSendCleanupToScene = true;
+                m_pNextScene = m_pobScenesStack[m_pobScenesStack.Count - 1];
+                m_pNextScene.Visible = true;
+                s.Reset(t, m_pNextScene);
+                m_pNextScene = s;
+            }
+            else
+            {
+                m_pNextScene = m_pobScenesStack[m_pobScenesStack.Count - 1];
+            }
+            m_bSendCleanupToScene = false;
+        }
+
+        //MARCO ADDED THIS METHOD
+        public void RemoveScenesFromStack(Type sceneType)
+        {
+            //Remove the scens of a specific type from the stack
+            for (int i = m_pobScenesStack.Count - 1; i >= 0; i--)
+            {
+                if (m_pobScenesStack[i].GetType() == sceneType)
+                {
+                    var current = m_pobScenesStack[i];
+                    if (current.IsRunning)
+                    {
+                        current.OnExitTransitionDidStart();
+                        current.OnExit();
+                    }
+                    current.Cleanup();
+                    m_pobScenesStack.RemoveAt(i);
+                }
+            }
+        }
+
+        //MARCO ADDED THIS METHOD
+        public void AddSceneToStackBeforeCurrent(CCScene scene)
+        {
+            if (m_pobScenesStack.Count > 0)
+            {
+                m_pobScenesStack.Insert(m_pobScenesStack.Count - 1, scene);
+            }
+            else
+            {
+                m_pobScenesStack.Add(scene);
+            }
+        }
+		
         /** Pops out all scenes from the queue until it reaches `level`.
          *   If level is 0, it will end the director.
          *   If level is 1, it will pop all scenes until it reaches to root scene.

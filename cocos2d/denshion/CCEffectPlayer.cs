@@ -143,5 +143,21 @@ namespace CocosDenshion
         }
 
         // the volume is gloabal, it will affect other effects' volume
+		
+		//MARCO ADDED PITCH/PAN OPTION
+        public void SetPitch(float p)
+        {
+            if (_sfxInstance != null && !_sfxInstance.IsDisposed && _sfxInstance.State == SoundState.Playing)
+            {
+                _sfxInstance.Pitch = p;
+            }
+        }
+        public void SetPan(float p)
+        {
+            if (_sfxInstance != null && !_sfxInstance.IsDisposed && _sfxInstance.State == SoundState.Playing)
+            {
+                _sfxInstance.Pan = p;
+            }
+        }
     }
 }

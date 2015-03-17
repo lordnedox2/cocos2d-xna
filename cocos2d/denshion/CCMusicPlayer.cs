@@ -227,5 +227,16 @@ namespace CocosDenshion
 
             return false;
         }
+		
+		 //MARCO ADDED THIS
+        public bool IsPaused()
+        {
+            if (MediaState.Paused == MediaPlayer.State)
+            {
+                return true;
+            }
+
+            return false;
+        }
     }
 }

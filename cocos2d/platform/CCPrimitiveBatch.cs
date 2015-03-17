@@ -16,6 +16,7 @@ namespace Cocos2D
         private readonly GraphicsDevice _device;
         private readonly VertexPositionColor[] _lineVertices;
         private readonly VertexPositionColor[] _triangleVertices;
+		private readonly VertexPositionTexture[] _textureVertices; //MARCO ADDED
 
         // hasBegun is flipped to true once Begin is called, and is used to make
         // sure users don't call End before Begin is called.
@@ -69,6 +70,14 @@ namespace Cocos2D
         public void SetProjection(ref Matrix projection)
         {
             _basicEffect.Projection = projection;
+        }
+		
+		//MARCO 
+        public void SetTexture(Texture2D texture)
+        {
+            _basicEffect.Texture = texture;
+            _basicEffect.TextureEnabled = (texture != null);
+            _basicEffect.VertexColorEnabled = !_basicEffect.TextureEnabled;
         }
 
         protected virtual void Dispose(bool disposing)
@@ -156,7 +165,31 @@ namespace Cocos2D
             }
         }
 
+		//MARCO ADDED
+        public void AddVertex(Vector2 vertex, Vector2 textureVertex, PrimitiveType primitiveType)
+        {
+            if (!_hasBegun)
+            {
+                throw new InvalidOperationException("Begin must be called before AddVertex can be called.");
+            }
 
+            if (primitiveType != PrimitiveType.TriangleStrip)
+            {
+                throw new NotSupportedException("The specified primitiveType is not supported by PrimitiveBatch.");
+            }
+
+            if (primitiveType == PrimitiveType.TriangleStrip)
+            {
+                if (_textureVertsCount >= _textureVertices.Length)
+                {
+                    FlushTextures();
+                }
+                _textureVertices[_textureVertsCount].Position = new Vector3(vertex, -0.1f);
+                _textureVertices[_textureVertsCount].TextureCoordinate = textureVertex;
+                _textureVertsCount++;
+            }
+        }
+		
         /// <summary>
         /// End is called once all the primitives have been drawn using AddVertex.
         /// it will call Flush to actually submit the draw call to the graphics card, and
@@ -194,6 +227,36 @@ namespace Cocos2D
 #endif
                 _device.DrawUserPrimitives(PrimitiveType.TriangleList, _triangleVertices, 0, primitiveCount);
                 _triangleVertsCount -= primitiveCount * 3;
+
+                CCDrawManager.DrawCount++;
+            }
+        }
+
+		//MARCO This method is mine
+        private void FlushTextures()
+        {
+            if (!_hasBegun)
+            {
+                throw new InvalidOperationException("Begin must be called before Flush can be called.");
+            }
+
+            if (_textureVertsCount >= 3)
+            {
+                //One triangle for each vertex, after the first 2 vertices
+                int primitiveCount = _textureVertsCount - 2;
+
+                // submit the draw call to the graphics card
+#if NETFX_CORE
+                _device.SamplerStates[0] = SamplerState.LinearClamp;
+#else
+                _device.SamplerStates[0] = SamplerState.AnisotropicWrap; //MARCO: Wrap means the texture will be repeated for coords values > 1.0f
+                //_device.SamplerStates[0] = SamplerState.AnisotropicClamp;
+#endif
+
+                _basicEffect.GraphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleStrip, _textureVertices, 0, primitiveCount);
+
+                //Reset the count 
+                _textureVertsCount = 0;
 
                 CCDrawManager.DrawCount++;
             }

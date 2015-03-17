@@ -148,7 +148,10 @@ namespace Cocos2D
         public static string FullPathFromRelativeFile(string pszFilename, string pszRelativeFile)
         {
             string path = Path.GetDirectoryName(pszRelativeFile);
-            return Path.Combine(path, RemoveExtension(pszFilename));
+			string fullPath = Path.Combine(path, RemoveExtension(pszFilename));
+            //MARCO Added to fix the texture cache problem. When use Path.Combine, it adds "\", while the key in the cache always has "/".
+            fullPath = fullPath.Replace('\\', '/');
+            return fullPath;
         }
 
         public static string RemoveExtension(string fileName)
